@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Missão de Estudo Português PMAL</title>
+<style>
+:root {
+--bg:#06080c; --panel:rgba(8,12,18,.86); --panel2:rgba(12,18,27,.75); --line:rgba(255,255,255,.12);
+--text:#f5f7fb; --muted:#b8c2d0; --gold:#e8b132; --red:#ff485e; --green:#2fda78; --blue:#3ea2ff;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0;font-family:Inter,Arial,sans-serif;color:var(--text);background:var(--bg)}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.82)),radial-gradient(circle at 20% 15%, rgba(255,255,255,.06), transparent 22%), linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.82));z-index:-2;transition:.3s}
+body::after{content:"";position:fixed;inset:0;background:radial-gradient(circle at 20% 15%, rgba(255,255,255,.06), transparent 22%),radial-gradient(circle at 10% 90%, rgba(255,40,40,.14), transparent 18%);z-index:-1}
+.wrap{max-width:1360px;margin:0 auto;padding:12px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.28);padding:10px 14px;border-radius:20px;border:1px solid var(--line)}
+.brand img{width:86px;height:86px;object-fit:cover;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.brandtext .mini{color:var(--gold);font-weight:800;letter-spacing:.12em;font-size:13px}
+.brandtext h1{margin:0;font-size:clamp(24px,4vw,44px);line-height:1.02}
+.brandtext h1 span{color:#d71e28}
+.brandtext .sub{margin-top:4px;color:var(--muted);font-weight:700;letter-spacing:.08em}
+.nav{display:flex;gap:8px;flex-wrap:wrap}
+button{border:none;border-radius:16px;padding:13px 16px;font-weight:800;cursor:pointer}
+.primary{background:linear-gradient(135deg,#cf1e1e,#841010);color:#fff}
+.secondary{background:#131b28;color:#fff;border:1px solid var(--line)}
+.gold{background:linear-gradient(135deg,#f3c960,#a86e12);color:#111}
+.green{background:linear-gradient(135deg,#2ec96f,#1c8b4b);color:#fff}
+.red{background:linear-gradient(135deg,#ef586f,#ab1d34);color:#fff}
+.screen{display:none} .screen.active{display:block}
+.grid-home{display:grid;grid-template-columns:1.35fr .85fr;gap:16px;margin-top:16px}
+.grid-game{display:grid;grid-template-columns:1.35fr .55fr;gap:16px;margin-top:16px}
+@media(max-width:980px){.grid-home,.grid-game{grid-template-columns:1fr} .brand{align-items:flex-start} .brand img{width:72px;height:72px}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(7px);box-shadow:0 16px 40px rgba(0,0,0,.28)}
+.badges,.row,.kpis{display:flex;gap:8px;flex-wrap:wrap}
+.badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);font-size:13px;font-weight:800}
+.badge.g{background:var(--gold);color:#111;border:none}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px;min-width:130px;flex:1}
+.kpi .v{display:block;font-size:26px;font-weight:900;margin-top:4px}
+.list{display:grid;gap:10px}
+.item{padding:14px;border-radius:16px;background:var(--panel2);border:1px solid var(--line)}
+.item.clickable{cursor:pointer}
+.item.locked{opacity:.55}
+.item small{color:var(--muted)}
+.statement{margin:16px 0;padding:20px;border-radius:20px;background:rgba(3,7,12,.78);border:1px solid var(--line);font-size:clamp(18px,2.5vw,22px);line-height:1.55}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:700px){.answers{grid-template-columns:1fr}}
+.answer{min-height:78px;font-size:20px;text-align:left;padding-left:22px}
+.answer.correct{outline:2px solid rgba(47,218,120,.9);background:rgba(47,218,120,.12)}
+.answer.wrong{outline:2px solid rgba(255,72,94,.9);background:rgba(255,72,94,.12)}
+.timer{height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08);border:1px solid var(--line);margin-top:14px}
+.timer>div{height:100%;width:100%;background:linear-gradient(90deg,var(--green),#9bf2c2);transition:width 1s linear}
+.feedback{display:none;margin-top:14px;padding:16px;border-radius:18px;border:1px solid var(--line)}
+.feedback.show{display:block} .feedback.good{background:rgba(47,218,120,.12)} .feedback.bad{background:rgba(255,72,94,.12)}
+.helpbtn{text-align:left;background:rgba(255,255,255,.06);color:#fff;border:1px solid var(--line);min-height:78px}
+.phasebar{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px} @media(max-width:900px){.phasebar{grid-template-columns:repeat(2,1fr)}}
+.phasechip{padding:10px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-weight:800;text-align:center}
+.phasechip.done{border-color:rgba(232,177,50,.8);color:var(--gold)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.modal.show{display:flex} .modalcard{width:min(760px,96vw);max-height:85vh;overflow:auto;background:#0e141d;border:1px solid var(--line);border-radius:24px;padding:20px}
+.footer{position:fixed;right:10px;bottom:8px;background:rgba(0,0,0,.35);padding:8px 12px;border-radius:999px;border:1px solid var(--line);font-weight:800}
+.progress{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid var(--line)} .progress>div{height:100%;background:linear-gradient(90deg,#57c940,#92ff75)}
+hr{border:none;border-top:1px solid var(--line);margin:14px 0}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <img src="/logo.png" alt="Logo Missão de Estudo">
+      <div class="brandtext">
+        <div class="mini">MISSÃO DE ESTUDO</div>
+        <h1>PORTUGUÊS <span>PMAL</span></h1>
+        <div class="sub">FOCO, DISCIPLINA E CONSTÂNCIA</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="secondary" onclick="showScreen('home')">Home</button>
+      <button class="secondary" onclick="showScreen('game')">Jogo</button>
+      <button class="secondary" onclick="showScreen('history')">Histórico</button>
+      <button class="secondary" onclick="showScreen('phases')">Fases</button>
+    </div>
+  </div>
+
+  <section id="home" class="screen active">
+    <div class="grid-home">
+      <div class="panel">
+        <div class="badge g">VERSÃO REVISADA • 255 QUESTÕES TOTAIS • CEBRASPE</div>
+        <h2 style="font-size:clamp(28px,4vw,48px);margin:14px 0 8px">Treino completo para aprender e fixar Português PMAL</h2>
+        <p class="muted" style="line-height:1.7">Questões distribuídas por fases, com foco reforçado em interpretação, pontuação, regência, ortografia, concordância, sintaxe e reescrita. O jogo salva progresso, permite rever questões já respondidas e reinicia da fase atual quando as 5 vidas acabam.</p>
+        <div class="list" style="margin-top:14px">
+          <div class="item"><b>🎯 255 questões</b><br><small>Versão ampliada com +150 questões além da base inicial.</small></div>
+          <div class="item"><b>🧠 Aprendizado rápido</b><br><small>Cada erro mostra a resposta correta com explicação resumida.</small></div>
+          <div class="item"><b>🔒 Revisão inteligente</b><br><small>No histórico, só é possível abrir questões já respondidas; o resto fica bloqueado.</small></div>
+          <div class="item"><b>🪖 Sistema de 5 vidas</b><br><small>Se perder, volta do início da fase atual, sem perder o resto do progresso.</small></div>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="primary" onclick="startNew()">Iniciar missão</button>
+          <button class="gold" onclick="continueGame()">Continuar</button>
+          <button class="secondary" onclick="resetAll()">Reiniciar tudo</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Painel geral</h3>
+        <div class="kpis" style="margin-top:12px">
+          <div class="kpi">Pontuação<span class="v" id="homeScore">0</span></div>
+          <div class="kpi">Respondidas<span class="v" id="homeAnswered">0 / 255</span></div>
+          <div class="kpi">Patente<span class="v" id="homePatent">Recruta</span></div>
+          <div class="kpi">Troféus<span class="v" id="homeTrophies">0</span></div>
+        </div>
+        <hr>
+        <div class="item"><b>Distribuição por prioridade</b><br><small>Interpretação recebe maior peso, seguida por pontuação e gramática fina.</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="grid-game">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+          <div class="badges">
+            <div class="badge" id="badgeTopic">Fase</div>
+            <div class="badge" id="badgeDiff">Nível</div>
+            <div class="badge g" id="badgeScore">0 pts</div>
+          </div>
+          <div class="badges">
+            <div class="badge" id="badgeLives">❤️ 5</div>
+            <div class="badge" id="badgeProgress">1 / 255</div>
+            <div class="badge" id="badgePatent">Recruta</div>
+          </div>
+        </div>
+        <div class="timer"><div id="timerFill"></div></div>
+        <div class="statement" id="statement"></div>
+        <div class="answers">
+          <button id="btnTrue" class="green answer" onclick="answer(true)">CERTO</button>
+          <button id="btnFalse" class="red answer" onclick="answer(false)">ERRADO</button>
+        </div>
+        <div id="feedback" class="feedback">
+          <div id="feedbackTitle" style="font-weight:900;font-size:18px"></div>
+          <div id="feedbackText" style="margin-top:6px;line-height:1.6"></div>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button class="secondary" id="nextBtn" disabled onclick="nextQuestion()">Próxima</button>
+        </div>
+        <div class="phasebar" id="phaseBar"></div>
+      </div>
+      <div class="panel">
+        <h3>Ajudas</h3>
+        <div class="list" style="margin-top:12px">
+          <button class="helpbtn" id="helpHint" onclick="useHelp('hint')"><b>🧠 Dica do Instrutor</b><br><small>Aponta o foco da cobrança.</small></button>
+          <button class="helpbtn" id="helpTime" onclick="useHelp('time')"><b>⏱ Tempo Extra</b><br><small>+15 segundos nesta questão.</small></button>
+          <button class="helpbtn" id="helpSkip" onclick="useHelp('skip')"><b>⏭ Pular</b><br><small>Avança sem perder vida.</small></button>
+          <button class="helpbtn" id="helpShield" onclick="useHelp('shield')"><b>🛡 Escudo</b><br><small>Seu próximo erro não tira vida.</small></button>
+        </div>
+        <hr>
+        <div class="item"><b>Mensagem da missão</b><div id="motivation" style="margin-top:8px;color:var(--gold);font-weight:900"></div></div>
+        <div class="item"><b>Status</b><div id="statusText" class="muted" style="margin-top:8px;line-height:1.7"></div></div>
+        <div class="item"><b>Progresso geral</b><div class="progress" style="margin-top:8px"><div id="overallBar" style="width:0%"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="history" class="screen">
+    <div class="grid-home">
+      <div class="panel">
+        <h3>Histórico e revisão</h3>
+        <div id="historyList" class="list" style="margin-top:12px"></div>
+      </div>
+      <div class="panel">
+        <h3>Resumo</h3>
+        <div class="kpis" style="margin-top:12px">
+          <div class="kpi">Acertos<span class="v" id="histCorrect">0</span></div>
+          <div class="kpi">Erros<span class="v" id="histWrong">0</span></div>
+          <div class="kpi">Precisão<span class="v" id="histAcc">0%</span></div>
+          <div class="kpi">Sessões<span class="v" id="histSessions">0</span></div>
+        </div>
+        <hr>
+        <div class="item"><b>Como funciona</b><br><small>Clique em uma questão já respondida para revisar. Questões ainda não respondidas aparecem bloqueadas.</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="phases" class="screen">
+    <div class="grid-home">
+      <div class="panel">
+        <h3>Fases</h3>
+        <div id="phaseList" class="list" style="margin-top:12px"></div>
+      </div>
+      <div class="panel">
+        <h3>Patentes</h3>
+        <div id="patentList" class="list" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="footer">📷 Siga no Instagram: @rikelmyyp</div>
+
+<div id="modal" class="modal"><div class="modalcard"><div id="modalContent"></div><div class="row" style="margin-top:14px"><button class="primary" onclick="closeModal()">Fechar</button></div></div></div>
+
+<script>
+const QUESTIONS = [{"topic": "Interpretação", "difficulty": "fácil", "statement": "Em itens com o comando “de acordo com o texto”, a banca tende a cobrar informação explícita.", "correct": true, "explanation": "Esse comando normalmente aponta para compreensão literal, não para inferência."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "A expressão “segundo o texto” costuma indicar que a resposta deve ser buscada diretamente no enunciado.", "correct": true, "explanation": "É um marcador clássico de compreensão."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Quando o item usa “infere-se do texto”, a resposta deve copiar literalmente uma frase do texto.", "correct": false, "explanation": "“Infere-se” pede dedução, leitura entre linhas."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Trocar “alguns” por “todos” pode tornar um item errado, mesmo que o tema geral permaneça igual.", "correct": true, "explanation": "Quantificadores absolutos são pegadinhas frequentes."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Compreensão e interpretação textual são exatamente a mesma habilidade, sem diferença prática em prova.", "correct": false, "explanation": "Compreensão foca o explícito; interpretação, o implícito."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Se o comando for inferencial, mas a afirmação reproduzir palavra por palavra o texto, convém desconfiar do item.", "correct": true, "explanation": "A Cebraspe usa essa casca de banana com frequência."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "A expressão “o autor afirma que” costuma orientar o candidato a localizar uma informação literal.", "correct": true, "explanation": "Ela indica informação objetivamente atribuída ao texto."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Em itens interpretativos, relações de causa e efeito podem ser decisivas para julgar a assertiva.", "correct": true, "explanation": "A inferência costuma depender dessas relações lógicas."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Conhecimento prévio pode ajudar, mas não substitui a leitura do texto.", "correct": true, "explanation": "O apoio externo não pode contrariar o que está escrito."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Na interpretação, o candidato deve ignorar totalmente o contexto externo para evitar subjetividade.", "correct": false, "explanation": "O contexto pode auxiliar, desde que a leitura permaneça coerente."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Ler o item antes do texto pode economizar tempo na prova.", "correct": true, "explanation": "Isso direciona o foco do candidato."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Em itens de compreensão, vale acrescentar opinião pessoal se ela for plausível.", "correct": false, "explanation": "A resposta deve ficar presa ao texto."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "“Conforme o texto” é um comando associado à compreensão.", "correct": true, "explanation": "É outro marcador de informação literal."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Em itens inferenciais, o texto pode sugerir uma ideia sem dizê-la expressamente.", "correct": true, "explanation": "Esse é o núcleo da inferência."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Se a banca usa “depreende-se”, ela sempre cobra opinião pessoal do leitor.", "correct": false, "explanation": "Ela cobra inferência, não opinião arbitrária."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Destacar termos absolutos como “nunca”, “sempre” e “apenas” ajuda a evitar erros.", "correct": true, "explanation": "Esses termos costumam distorcer o sentido do texto."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Ao interpretar, o candidato pode precisar conectar informações de parágrafos diferentes.", "correct": true, "explanation": "A inferência pode depender da visão global do texto."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Em compreensão, reformular a frase com sinônimos sempre preserva o sentido original.", "correct": false, "explanation": "Uma paráfrase mal feita pode alterar o sentido."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Se a afirmação usa verbo no passado e o texto está no presente, a alteração temporal pode invalidar o item.", "correct": true, "explanation": "Trocas de tempo verbal mudam o conteúdo proposicional."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "A leitura ativa ajuda na interpretação, porque obriga o leitor a rastrear tese e argumentos.", "correct": true, "explanation": "É uma estratégia útil para itens Cebraspe."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Itens de interpretação nunca cobram intenção do autor.", "correct": false, "explanation": "Intenção e efeito de sentido podem ser explorados."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Quando o texto diz algo de forma objetiva, o item correspondente tende a ser de compreensão.", "correct": true, "explanation": "A resposta normalmente está na superfície textual."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Uma inferência correta pode ser anulada se contrariar uma informação explícita do texto.", "correct": true, "explanation": "O implícito não pode negar o explícito."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Paráfrases que mantêm o núcleo semântico tendem a ser aceitas como corretas.", "correct": true, "explanation": "Desde que não alterem extensão, intensidade ou relação lógica."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "A banca pode errar o item apenas mudando um advérbio de intensidade.", "correct": true, "explanation": "Trocas pequenas podem distorcer a ideia original."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Em itens com “conclui-se”, o candidato deve verificar se há base lógica no conjunto do texto.", "correct": true, "explanation": "A conclusão precisa decorrer do todo."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Toda inferência válida precisa estar escrita, pelo menos em parte, com as mesmas palavras do texto.", "correct": false, "explanation": "Inferir é ir além da formulação literal."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Distinguir fato e opinião ajuda a interpretar textos argumentativos.", "correct": true, "explanation": "Isso evita confundir tese com dado."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "A compreensão textual dispensa atenção à pontuação.", "correct": false, "explanation": "Pontuação pode mudar o sentido e a referência."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Perguntas sobre informação literal costumam ser resolvidas com busca objetiva no trecho relevante.", "correct": true, "explanation": "É uma boa tática de prova."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Em itens de compreensão, a resposta correta deve respeitar exatamente o que o texto diz, sem extrapolar.", "correct": true, "explanation": "Compreensão literal exige fidelidade ao texto."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Se o item usa “é possível perceber”, ele necessariamente cobra compreensão, e nunca interpretação.", "correct": false, "explanation": "A expressão pode abrir espaço para inferência, dependendo do contexto."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "A relação entre tese e exemplo pode ser útil para resolver itens inferenciais.", "correct": true, "explanation": "Exemplos ajudam a sustentar e esclarecer a tese."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Uma contradição entre título e corpo do texto é irrelevante para a interpretação.", "correct": false, "explanation": "O título participa da construção de sentido."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "A leitura do enunciado antes do texto ajuda a selecionar informações importantes.", "correct": true, "explanation": "É uma estratégia de foco."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Na Cebraspe, trocar “pode” por “deve” pode invalidar o item.", "correct": true, "explanation": "Modalizadores alteram o grau de certeza."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Inferência válida é aquela que decorre logicamente do texto, não da imaginação do candidato.", "correct": true, "explanation": "A dedução precisa ser ancorada no texto."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Em itens literais, mudanças de ordem dos termos nunca alteram o sentido.", "correct": false, "explanation": "A reordenação pode produzir ênfase ou até ambiguidade."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "“Com base no texto” costuma exigir resposta apoiada no que foi lido.", "correct": true, "explanation": "É outro comando de apoio textual."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Se a afirmação mistura informação explícita com conclusão não autorizada, o item tende a ficar errado.", "correct": true, "explanation": "Basta um trecho sem base para invalidar o item."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "A interpretação elimina totalmente a objetividade do texto.", "correct": false, "explanation": "Ela amplia o sentido, mas ainda deve respeitar o texto."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "A expressão “o texto informa que” aponta para dado explícito.", "correct": true, "explanation": "É marcador de compreensão."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Pronomes e conectivos podem ser decisivos para identificar quem faz o quê no texto.", "correct": true, "explanation": "Eles organizam a coesão e a lógica."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "O candidato pode ignorar o gênero textual ao interpretar, porque só o conteúdo importa.", "correct": false, "explanation": "O gênero influencia objetivo, tom e organização."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Se duas alternativas parecem plausíveis, a correta será a que se prende mais rigidamente ao texto.", "correct": true, "explanation": "Esse critério reduz extrapolações indevidas."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Mudança de uma palavra negativa para afirmativa altera o valor do item.", "correct": true, "explanation": "Negação muda o sentido da proposição."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Inferências sobre causa e consequência podem ser cobradas mesmo sem conectivos explícitos.", "correct": true, "explanation": "A relação pode estar implícita."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "A banca nunca cobra pressupostos e subentendidos.", "correct": false, "explanation": "Isso aparece sobretudo em itens inferenciais."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Em leitura de prova, grifar verbos de comando ajuda a reconhecer o tipo de questão.", "correct": true, "explanation": "O comando já indica a estratégia."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "A conclusão inferida deve ser compatível com o contexto interno do texto.", "correct": true, "explanation": "Ela precisa dialogar com o que foi dito."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Quando o item apresenta ideia mais ampla que a do texto, tende a estar errado.", "correct": true, "explanation": "Generalizações indevidas são comuns."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Expressões como “apenas” e “exclusivamente” costumam exigir cautela redobrada.", "correct": true, "explanation": "Elas restringem o sentido e geram erro com facilidade."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Se o autor afirma algo explicitamente, o candidato não precisa supor intenção oculta para acertar um item literal.", "correct": true, "explanation": "Basta localizar a informação."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "O contexto externo pode enriquecer a interpretação, mas não pode contradizer o texto.", "correct": true, "explanation": "Ele funciona como apoio, não como substituto."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Em texto argumentativo, a tese é sempre a primeira frase do texto.", "correct": false, "explanation": "Ela pode aparecer em outras posições."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "A banca pode considerar errado um item que apenas intensifique a ideia original sem autorização textual.", "correct": true, "explanation": "Intensificação altera o conteúdo."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Leitura entre linhas depende de pistas dadas pelo próprio texto.", "correct": true, "explanation": "A inferência não nasce do nada."}, {"topic": "Interpretação", "difficulty": "médio", "statement": "Paráfrase fiel mantém sentido, ainda que troque palavras.", "correct": true, "explanation": "O que importa é preservar a ideia."}, {"topic": "Interpretação", "difficulty": "difícil", "statement": "Uma informação implícita pode ser correta mesmo sem nenhuma base textual identificável.", "correct": false, "explanation": "Sem base, vira palpite."}, {"topic": "Interpretação", "difficulty": "fácil", "statement": "Releitura seletiva é útil quando o comando do item aponta o trecho relevante.", "correct": true, "explanation": "Ajuda a ganhar tempo."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "A vírgula não deve separar sujeito e verbo sem justificativa sintática.", "correct": true, "explanation": "Essa separação é erro clássico."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "A vírgula pode isolar termo explicativo ou elemento intercalado.", "correct": true, "explanation": "Ela marca intercalação em muitos casos."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "Pontuação serve apenas para marcar pausa respiratória.", "correct": false, "explanation": "Ela também organiza relações sintáticas e semânticas."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "A retirada da vírgula em oração adjetiva explicativa pode alterar o sentido.", "correct": true, "explanation": "Ela pode transformar a explicativa em restritiva."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "Travessão, parênteses e vírgulas intercalam ideias equivalentes em muitos contextos.", "correct": true, "explanation": "Trocar um pelo outro costuma afetar mais o destaque que a correção."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "Dois-pontos podem introduzir explicação, enumeração ou fala.", "correct": true, "explanation": "São usos clássicos do sinal."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "O ponto e vírgula nunca pode separar orações coordenadas.", "correct": false, "explanation": "Ele pode ser usado para separar coordenadas mais extensas ou já segmentadas por vírgulas."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "Aspas podem destacar citação, estrangeirismo ou uso especial de uma palavra.", "correct": true, "explanation": "Esse é um emprego comum."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "Reticências podem sugerir suspensão, hesitação ou continuidade.", "correct": true, "explanation": "Elas produzem efeito de suspensão."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "O travessão só pode aparecer em diálogos.", "correct": false, "explanation": "Também pode isolar termo explicativo."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "Vírgula entre verbo e complemento, sem intercalação, tende a ser inadequada.", "correct": true, "explanation": "Em regra, não se separa o núcleo verbal de seus complementos."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "A omissão indevida da vírgula em adjunto adverbial deslocado nunca afeta a correção.", "correct": false, "explanation": "Em vários casos a vírgula é recomendada ou necessária."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "Parênteses podem inserir comentário acessório.", "correct": true, "explanation": "Eles marcam informação secundária."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "O ponto final pode ser usado para encerrar período declarativo completo.", "correct": true, "explanation": "É o uso básico do sinal."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "Vírgula antes de “e” é sempre proibida.", "correct": false, "explanation": "Pode ocorrer, por exemplo, para isolar termo intercalado ou marcar sujeitos diferentes em coordenadas."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "A vírgula pode separar itens de uma enumeração.", "correct": true, "explanation": "É um caso elementar."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "O uso de pontuação pode interferir diretamente na interpretação do período.", "correct": true, "explanation": "Não é mero ornamento gráfico."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "Em oração subordinada adverbial antecipada, a vírgula costuma ser usada.", "correct": true, "explanation": "A antecipação favorece a marcação por vírgula."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "A mudança de pontuação jamais altera a classificação de uma oração adjetiva.", "correct": false, "explanation": "Ela pode alterar o valor explicativo ou restritivo."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "O ponto de interrogação marca enunciado interrogativo direto.", "correct": true, "explanation": "É seu emprego característico."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "O ponto de exclamação pode expressar ênfase, espanto ou ordem enfática.", "correct": true, "explanation": "Ele intensifica o enunciado."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "Colocar vírgula entre nome e adjunto adnominal sem motivo é inadequado.", "correct": true, "explanation": "Há ruptura indevida do sintagma."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "Uma oração reduzida deslocada pode vir separada por vírgula.", "correct": true, "explanation": "O deslocamento justifica a marcação."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "A pontuação é totalmente independente da sintaxe.", "correct": false, "explanation": "Pontuação e sintaxe estão intimamente ligadas."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "O uso de aspas não substitui a necessidade de coerência sintática do período.", "correct": true, "explanation": "O sinal não corrige estrutura gramatical."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "Em certos contextos, os dois-pontos funcionam como anúncio de explicação.", "correct": true, "explanation": "Esse valor é recorrente."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "O ponto e vírgula é mais frequente que a vírgula em provas da PMAL.", "correct": false, "explanation": "A vírgula domina a maioria das questões de pontuação."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "Vírgulas podem isolar vocativo.", "correct": true, "explanation": "Ex.: “Soldado, atenção!”"}, {"topic": "Pontuação", "difficulty": "médio", "statement": "Vocativo não deve ser confundido com sujeito.", "correct": true, "explanation": "O vocativo chama; o sujeito pratica ou sofre a ação."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "A retirada de vírgulas em aposto explicativo sempre preserva o sentido integral.", "correct": false, "explanation": "Pode haver alteração de leitura e função."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "O travessão pode introduzir fala em textos narrativos.", "correct": true, "explanation": "É uso tradicional."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "Em enumerações mais complexas, o ponto e vírgula pode organizar melhor os itens.", "correct": true, "explanation": "Ele evita confusão quando já há vírgulas internas."}, {"topic": "Pontuação", "difficulty": "fácil", "statement": "A pontuação adequada ajuda a esclarecer relações de coordenação e subordinação.", "correct": true, "explanation": "Ela sinaliza a organização do período."}, {"topic": "Pontuação", "difficulty": "médio", "statement": "A ausência de vírgula em oração explicativa pode comprometer a norma-padrão.", "correct": true, "explanation": "A explicativa pede isolamento."}, {"topic": "Pontuação", "difficulty": "difícil", "statement": "Reticências e ponto final produzem exatamente o mesmo efeito de sentido.", "correct": false, "explanation": "O primeiro suspende, o segundo encerra."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "O verbo “obedecer” rege a preposição “a”.", "correct": true, "explanation": "Diz-se obedecer a algo ou a alguém."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "No sentido de ver, o verbo “assistir” pode exigir a preposição “a”.", "correct": true, "explanation": "Ex.: assistir ao jogo."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "No sentido de ajudar, o verbo “assistir” mantém obrigatoriamente a mesma regência de “ver”.", "correct": false, "explanation": "No sentido de prestar assistência, a regência é diferente."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "No sentido de ter em vista, o verbo “visar” rege a preposição “a”.", "correct": true, "explanation": "Ex.: visar ao cargo."}, {"topic": "Regência e Crase", "difficulty": "difícil", "statement": "O verbo “preferir” admite, na norma-padrão, a construção “prefiro café do que chá”.", "correct": false, "explanation": "O padrão é “prefiro café a chá”."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "A crase resulta, em regra, da fusão de preposição “a” com artigo feminino “a/as”.", "correct": true, "explanation": "Esse é o mecanismo básico."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "Antes de palavra masculina, o uso da crase é normalmente inadequado.", "correct": true, "explanation": "Não há artigo feminino para fusão."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "Antes de verbo, o sinal de crase costuma ser proibido.", "correct": true, "explanation": "Verbo não admite artigo."}, {"topic": "Regência e Crase", "difficulty": "difícil", "statement": "Antes de nome próprio feminino, a crase é sempre obrigatória.", "correct": false, "explanation": "Há casos facultativos."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "A palavra “casa”, sem especificador, geralmente dispensa crase.", "correct": true, "explanation": "Ex.: vou a casa."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "A banca costuma explorar se a crase é obrigatória, facultativa ou proibida.", "correct": true, "explanation": "Essa classificação cai bastante."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "Em locuções adverbiais femininas, o uso da crase pode ser obrigatório.", "correct": true, "explanation": "Ex.: à tarde, às vezes."}, {"topic": "Regência e Crase", "difficulty": "difícil", "statement": "Em “cheguei à cidade”, o acento grave é impossível.", "correct": false, "explanation": "Há preposição exigida pelo verbo e artigo feminino no nome."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "A regência verbal errada pode invalidar toda a assertiva.", "correct": true, "explanation": "Basta uma preposição incorreta para tornar o item errado."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "O verbo “aspirar”, no sentido de desejar, pode pedir preposição “a”.", "correct": true, "explanation": "Ex.: aspirar ao cargo."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "Em “vou à escola”, a crase pode ocorrer pela fusão de preposição com artigo.", "correct": true, "explanation": "O verbo ir exige preposição e o substantivo admite artigo."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "Em “até a escola” e “até à escola”, a crase pode ser facultativa em certos contextos.", "correct": true, "explanation": "A preposição “até” gera esse caso clássico."}, {"topic": "Regência e Crase", "difficulty": "difícil", "statement": "Toda locução feminina exige obrigatoriamente crase.", "correct": false, "explanation": "É preciso analisar o caso específico."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "A troca da preposição exigida por um verbo é pegadinha típica de regência.", "correct": true, "explanation": "É um dos erros mais cobrados."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "Em muitos itens, a correção depende mais da regência do que do significado isolado das palavras.", "correct": true, "explanation": "A relação sintática é decisiva."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "A crase pode ser proibida antes de pronomes em vários contextos.", "correct": true, "explanation": "Em geral, pronomes não admitem artigo."}, {"topic": "Regência e Crase", "difficulty": "difícil", "statement": "A presença da preposição “a” basta, por si só, para justificar a crase.", "correct": false, "explanation": "Também é preciso haver artigo ou elemento equivalente."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "Em “refiro-me à aluna”, o acento grave é compatível com a norma-padrão.", "correct": true, "explanation": "Há verbo que exige preposição e substantivo feminino com artigo."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "Em “entreguei o material a ela”, a crase é inadequada.", "correct": true, "explanation": "Pronomes pessoais não admitem artigo."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "Regência nominal também pode exigir preposição específica.", "correct": true, "explanation": "Não é tema exclusivo dos verbos."}, {"topic": "Regência e Crase", "difficulty": "difícil", "statement": "Crase e regência são temas independentes, sem qualquer contato entre si.", "correct": false, "explanation": "Muitas vezes a crase depende justamente da regência."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "Em “obedeci à ordem”, a crase é possível.", "correct": true, "explanation": "O verbo pede preposição e “ordem” admite artigo."}, {"topic": "Regência e Crase", "difficulty": "médio", "statement": "A locução “à medida que” ilustra uso consolidado de crase.", "correct": true, "explanation": "É expressão tradicional da norma."}, {"topic": "Regência e Crase", "difficulty": "fácil", "statement": "Antes de numeral feminino determinado, a crase pode ocorrer.", "correct": true, "explanation": "Ex.: referiu-se às duas candidatas."}, {"topic": "Regência e Crase", "difficulty": "difícil", "statement": "Se o termo seguinte não admite artigo, não haverá crase por fusão com o artigo definido.", "correct": true, "explanation": "Sem artigo, não se forma a fusão básica."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "Na oposição entre “tem” e “têm”, a forma plural leva acento circunflexo.", "correct": true, "explanation": "É um ponto clássico de prova."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "“Porque” junto e sem acento pode exercer valor explicativo ou causal.", "correct": true, "explanation": "É conjunção em muitos contextos."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "“Porquê”, com acento e junto, nunca pode funcionar como substantivo.", "correct": false, "explanation": "Pode, como em “o porquê da decisão”."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "No fim da frase, é comum o uso de “por quê”.", "correct": true, "explanation": "A posição tônica justifica o acento."}, {"topic": "Ortografia", "difficulty": "difícil", "statement": "“Por que” e “porque” são sempre intercambiáveis.", "correct": false, "explanation": "Cada forma depende de função e posição."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "“Mau” se opõe a “bom”, e “mal” se opõe a “bem”.", "correct": true, "explanation": "Esse contraste resolve muitas questões."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "Hífen com prefixo terminado em vogal e segundo elemento iniciado por r ou s pode desaparecer, com duplicação da consoante.", "correct": true, "explanation": "Ex.: antirrugas."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "Prefixos tônicos como pré-, pró- e pós- tendem a manter o hífen.", "correct": true, "explanation": "É a regra geral."}, {"topic": "Ortografia", "difficulty": "difícil", "statement": "Locuções compostas sempre mantêm hífen.", "correct": false, "explanation": "Muitas locuções são escritas sem hífen."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "Homônimos e parônimos exigem atenção, porque podem gerar troca de sentido.", "correct": true, "explanation": "É tema frequente em ortografia."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "Em “porquê”, a classe gramatical interfere na grafia correta.", "correct": true, "explanation": "Quando substantivo, leva acento."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "Os empregos de s, z, j, g, x e ch pertencem ao domínio ortográfico.", "correct": true, "explanation": "São subtópicos tradicionais."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "“Mal-humorado” mostra caso em que o hífen pode ser mantido.", "correct": true, "explanation": "Com “mal”, há casos específicos."}, {"topic": "Ortografia", "difficulty": "difícil", "statement": "A semelhança sonora garante que duas palavras tenham a mesma grafia.", "correct": false, "explanation": "Pronúncia parecida não implica escrita igual."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "A escolha entre “sessão”, “seção” e “cessão” depende do significado.", "correct": true, "explanation": "São parônimos bastante cobrados."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "“A cerca de” e “acerca de” têm o mesmo valor em qualquer contexto.", "correct": false, "explanation": "A locução e a expressão têm usos distintos."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "Erros ortográficos podem alterar sentido ou apenas ferir a norma-padrão.", "correct": true, "explanation": "Há casos com impacto semântico e outros apenas formais."}, {"topic": "Ortografia", "difficulty": "difícil", "statement": "Antes de pausa, a forma correta é sempre “porque”.", "correct": false, "explanation": "No fim de frase, pode aparecer “por quê”."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "Acentuação e ortografia costumam aparecer juntas em blocos de gramática fina.", "correct": true, "explanation": "O PDF agrupa esses temas na estratégia de estudo."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "A escolha entre “mas” e “mais” envolve sentido, não apenas som.", "correct": true, "explanation": "Conjunção adversativa e advérbio de intensidade não se confundem."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "Escrever corretamente palavras de uso frequente ajuda a evitar erros bobos de prova.", "correct": true, "explanation": "Ortografia também é tema de atenção."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "“Há” e “a” podem se alternar livremente em expressões temporais.", "correct": false, "explanation": "“Há” indica tempo decorrido; “a” pode indicar tempo futuro."}, {"topic": "Ortografia", "difficulty": "difícil", "statement": "O hífen deixou de ser cobrado após o Acordo Ortográfico.", "correct": false, "explanation": "Continua sendo tema clássico."}, {"topic": "Ortografia", "difficulty": "fácil", "statement": "“Mas” e “más” diferem em grafia e significado.", "correct": true, "explanation": "Uma é conjunção; a outra, adjetivo no plural."}, {"topic": "Ortografia", "difficulty": "médio", "statement": "Em muitos casos ortográficos, a memorização de padrões evita pegadinhas da banca.", "correct": true, "explanation": "A banca explora regularidades e exceções."}, {"topic": "Concordância", "difficulty": "fácil", "statement": "Em “alugam-se casas”, o verbo concorda com o sujeito paciente.", "correct": true, "explanation": "Trata-se de voz passiva sintética."}, {"topic": "Concordância", "difficulty": "médio", "statement": "A forma “tratam-se de problemas” está de acordo com a norma-padrão.", "correct": false, "explanation": "O correto é “trata-se de problemas”."}, {"topic": "Concordância", "difficulty": "fácil", "statement": "Concordância verbal e nominal são temas relevantes na prova da PMAL.", "correct": true, "explanation": "Fazem parte do bloco de gramática fina."}, {"topic": "Concordância", "difficulty": "médio", "statement": "Partitivos podem gerar dúvida de concordância verbal.", "correct": true, "explanation": "A banca gosta desse ponto."}, {"topic": "Concordância", "difficulty": "difícil", "statement": "Em voz passiva sintética, o verbo fica invariável em qualquer contexto.", "correct": false, "explanation": "Ele concorda com o sujeito paciente, quando houver."}, {"topic": "Concordância", "difficulty": "fácil", "statement": "A concordância nominal envolve relação entre substantivo, adjetivo, artigo e outros determinantes.", "correct": true, "explanation": "É o núcleo do tema."}, {"topic": "Concordância", "difficulty": "médio", "statement": "A expressão “é proibido entrada” está sempre correta.", "correct": false, "explanation": "A correção depende da determinação do substantivo."}, {"topic": "Concordância", "difficulty": "médio", "statement": "Em muitos casos, a posição do termo pode influenciar a leitura da concordância.", "correct": true, "explanation": "A ordem pode induzir erro de interpretação."}, {"topic": "Concordância", "difficulty": "difícil", "statement": "Se o sujeito estiver no singular, o verbo jamais pode aparecer no plural.", "correct": false, "explanation": "Há construções especiais e concordância ideológica em alguns contextos."}, {"topic": "Concordância", "difficulty": "fácil", "statement": "A banca explora bastante concordância com o pronome “se”.", "correct": true, "explanation": "Especialmente em voz passiva sintética."}, {"topic": "Concordância", "difficulty": "médio", "statement": "Concordância errada pode surgir mesmo quando todas as palavras parecem próximas do padrão.", "correct": true, "explanation": "O erro costuma ser sutil."}, {"topic": "Concordância", "difficulty": "fácil", "statement": "Concordância nominal pode ser cobrada junto com análise de classes de palavras.", "correct": true, "explanation": "Os temas se comunicam."}, {"topic": "Concordância", "difficulty": "médio", "statement": "A presença de dois núcleos no sujeito pode alterar a forma verbal.", "correct": true, "explanation": "Sujeito composto afeta a concordância."}, {"topic": "Concordância", "difficulty": "difícil", "statement": "Em estruturas com porcentagem, não há possibilidade de variação de concordância.", "correct": false, "explanation": "A concordância pode oscilar conforme o contexto."}, {"topic": "Concordância", "difficulty": "fácil", "statement": "A banca costuma testar se o verbo concorda com o termo certo da oração.", "correct": true, "explanation": "Esse é o ponto central."}, {"topic": "Concordância", "difficulty": "médio", "statement": "Em expressões com “a maioria de”, o contexto pode influenciar a concordância.", "correct": true, "explanation": "Há tendência e variação admitida em certos casos."}, {"topic": "Concordância", "difficulty": "médio", "statement": "Concordância nominal não tem relação com sentido.", "correct": false, "explanation": "O sentido e o foco da expressão podem influir na interpretação."}, {"topic": "Concordância", "difficulty": "difícil", "statement": "Se a frase estiver correta quanto à regência, a concordância deixa de importar.", "correct": false, "explanation": "São critérios independentes."}, {"topic": "Concordância", "difficulty": "fácil", "statement": "Regras de concordância verbal estão entre os tópicos mais cobrados da disciplina.", "correct": true, "explanation": "O PDF destaca o tema no ranking."}, {"topic": "Concordância", "difficulty": "médio", "statement": "A análise de vozes verbais pode aparecer junto com concordância.", "correct": true, "explanation": "O PDF menciona vozes verbais no bloco de concordância."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Substantivo, adjetivo, artigo, pronome, verbo, advérbio e conjunção são classes de palavras.", "correct": true, "explanation": "São classes gramaticais centrais do edital."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "Advérbio modifica apenas verbos.", "correct": false, "explanation": "Também pode modificar adjetivos e outros advérbios."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Pronome pode retomar ou substituir um termo do texto.", "correct": true, "explanation": "Isso é importante para coesão."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "Artigo não tem relação com determinação do substantivo.", "correct": false, "explanation": "Ele ajuda a determinar e especificar o nome."}, {"topic": "Classes de Palavras", "difficulty": "difícil", "statement": "Conjunção e preposição exercem exatamente a mesma função sintática.", "correct": false, "explanation": "Ambas conectam, mas em planos diferentes."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Adjetivo atribui característica ao substantivo.", "correct": true, "explanation": "Essa é sua função típica."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "Verbo pode indicar ação, estado, fenômeno ou processo.", "correct": true, "explanation": "Sua noção semântica é ampla."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Advérbio pode expressar tempo, modo, lugar, intensidade e negação.", "correct": true, "explanation": "São valores frequentes."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "Pronome relativo pode introduzir oração subordinada adjetiva.", "correct": true, "explanation": "Ele retoma um antecedente."}, {"topic": "Classes de Palavras", "difficulty": "difícil", "statement": "Interjeição é uma classe sem valor expressivo.", "correct": false, "explanation": "Ela justamente expressa emoção, apelo ou reação."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Conjunções podem estabelecer relação de adição, oposição, causa e conclusão.", "correct": true, "explanation": "Elas organizam o período composto."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "Artigo indefinido sempre torna o referente totalmente determinado.", "correct": false, "explanation": "Ele costuma introduzir referente não especificado."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Substantivos nomeiam seres, ações, estados ou qualidades.", "correct": true, "explanation": "A classe é bastante abrangente."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "Preposição pode ligar palavras e estabelecer relação de sentido entre elas.", "correct": true, "explanation": "Esse é seu papel básico."}, {"topic": "Classes de Palavras", "difficulty": "difícil", "statement": "Todo pronome exerce exclusivamente função de sujeito.", "correct": false, "explanation": "Ele pode ocupar várias funções."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Classes de palavras se relacionam com a estrutura morfossintática do período.", "correct": true, "explanation": "O estudo do período passa por essas classes."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "Locução adjetiva e adjetivo podem desempenhar funções próximas, embora não sejam idênticos.", "correct": true, "explanation": "A banca explora equivalências e diferenças."}, {"topic": "Classes de Palavras", "difficulty": "médio", "statement": "A classificação de uma palavra independe do contexto.", "correct": false, "explanation": "Há palavras com valor contextual variável."}, {"topic": "Classes de Palavras", "difficulty": "difícil", "statement": "Conjunção integrante e conjunção coordenativa pertencem exatamente ao mesmo grupo funcional.", "correct": false, "explanation": "Uma introduz subordinada substantiva; a outra coordena orações ou termos."}, {"topic": "Classes de Palavras", "difficulty": "fácil", "statement": "Reconhecer a classe da palavra ajuda a resolver itens de sintaxe e pontuação.", "correct": true, "explanation": "Os temas são interligados."}, {"topic": "Tipologia e Gêneros", "difficulty": "fácil", "statement": "Texto injuntivo orienta ações por meio de comandos ou instruções.", "correct": true, "explanation": "Receitas e manuais são exemplos típicos."}, {"topic": "Tipologia e Gêneros", "difficulty": "fácil", "statement": "Texto narrativo costuma apresentar personagens, tempo, espaço e enredo.", "correct": true, "explanation": "Esses elementos estruturam a narração."}, {"topic": "Tipologia e Gêneros", "difficulty": "médio", "statement": "Todo texto argumentativo é também narrativo.", "correct": false, "explanation": "Argumentação e narração têm objetivos distintos."}, {"topic": "Tipologia e Gêneros", "difficulty": "médio", "statement": "Texto descritivo busca construir imagem verbal por meio de detalhes e adjetivos.", "correct": true, "explanation": "Essa é sua função central."}, {"topic": "Tipologia e Gêneros", "difficulty": "difícil", "statement": "Gênero textual se confunde totalmente com tipo textual.", "correct": false, "explanation": "Tipo é categoria ampla; gênero é manifestação social específica."}, {"topic": "Tipologia e Gêneros", "difficulty": "fácil", "statement": "Notícia pode ser tratada como gênero informativo/expositivo.", "correct": true, "explanation": "Seu foco é informar de modo objetivo."}, {"topic": "Tipologia e Gêneros", "difficulty": "médio", "statement": "Entrevista é exemplo comum de texto dialogal.", "correct": true, "explanation": "Ela pressupõe interlocutores."}, {"topic": "Tipologia e Gêneros", "difficulty": "médio", "statement": "Artigo de opinião tende a ser gênero dissertativo-argumentativo.", "correct": true, "explanation": "Defende uma tese com argumentos."}, {"topic": "Tipologia e Gêneros", "difficulty": "difícil", "statement": "Manual de instruções é gênero narrativo, por relatar uma sequência.", "correct": false, "explanation": "Ele é injuntivo/instrucional."}, {"topic": "Tipologia e Gêneros", "difficulty": "fácil", "statement": "Texto poético explora ritmo, sonoridade e imagens.", "correct": true, "explanation": "São marcas recorrentes."}, {"topic": "Tipologia e Gêneros", "difficulty": "médio", "statement": "Tipos textuais são mais estáveis; gêneros textuais são mais variados e flexíveis.", "correct": true, "explanation": "Essa distinção aparece na teoria geral."}, {"topic": "Tipologia e Gêneros", "difficulty": "médio", "statement": "Receita culinária é exemplo de gênero injuntivo.", "correct": true, "explanation": "Ela orienta um fazer."}, {"topic": "Tipologia e Gêneros", "difficulty": "difícil", "statement": "O objetivo comunicativo do gênero é irrelevante para sua identificação.", "correct": false, "explanation": "Finalidade é critério central."}, {"topic": "Tipologia e Gêneros", "difficulty": "fácil", "statement": "Texto dialogal requer, em regra, pelo menos dois interlocutores.", "correct": true, "explanation": "É traço definidor."}, {"topic": "Tipologia e Gêneros", "difficulty": "médio", "statement": "Texto dissertativo-expositivo busca informar sem necessariamente persuadir.", "correct": true, "explanation": "Ele expõe com objetividade."}, {"topic": "Sintaxe do Período", "difficulty": "fácil", "statement": "Período simples é estruturado em torno de uma oração.", "correct": true, "explanation": "Ele tem um único núcleo oracional."}, {"topic": "Sintaxe do Período", "difficulty": "fácil", "statement": "Período composto envolve mais de uma oração.", "correct": true, "explanation": "É o conceito básico."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "Coordenação e subordinação são relações possíveis entre orações.", "correct": true, "explanation": "Elas organizam o período composto."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "Oração subordinada adjetiva explicativa e restritiva têm sempre o mesmo sentido.", "correct": false, "explanation": "A pontuação e o valor semântico as diferenciam."}, {"topic": "Sintaxe do Período", "difficulty": "difícil", "statement": "Termos essenciais, integrantes e acessórios são irrelevantes para a análise sintática.", "correct": false, "explanation": "São divisões clássicas do estudo da oração."}, {"topic": "Sintaxe do Período", "difficulty": "fácil", "statement": "Sujeito e predicado integram a base da oração.", "correct": true, "explanation": "São termos essenciais."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "Objeto direto e objeto indireto pertencem aos termos integrantes.", "correct": true, "explanation": "Eles completam o verbo."}, {"topic": "Sintaxe do Período", "difficulty": "fácil", "statement": "Adjunto adverbial é termo acessório da oração.", "correct": true, "explanation": "Ele acrescenta circunstância."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "Aposto e vocativo exercem exatamente a mesma função.", "correct": false, "explanation": "São termos distintos."}, {"topic": "Sintaxe do Período", "difficulty": "difícil", "statement": "Toda oração subordinada adverbial precisa aparecer no final do período.", "correct": false, "explanation": "Ela pode ser deslocada."}, {"topic": "Sintaxe do Período", "difficulty": "fácil", "statement": "Orações coordenadas podem ser sindéticas ou assindéticas.", "correct": true, "explanation": "A presença de conectivo diferencia essas formas."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "Conjunções subordinativas ajudam a identificar o valor da oração.", "correct": true, "explanation": "Elas marcam causa, condição, concessão etc."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "A análise sintática pode ser exigida em conjunto com pontuação.", "correct": true, "explanation": "Os temas caminham juntos."}, {"topic": "Sintaxe do Período", "difficulty": "difícil", "statement": "Se duas orações estiverem ligadas por “e”, a relação será sempre de adição simples.", "correct": false, "explanation": "O conectivo pode assumir nuances contextuais."}, {"topic": "Sintaxe do Período", "difficulty": "fácil", "statement": "Reconhecer o núcleo do sujeito ajuda a resolver itens de concordância.", "correct": true, "explanation": "A concordância verbal depende disso."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "A oração sem verbo não pode ser considerada oração na gramática tradicional.", "correct": true, "explanation": "O verbo ou locução verbal é elemento central."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "Subordinação entre termos da oração também integra o conteúdo do edital.", "correct": true, "explanation": "Não se limita à relação entre orações."}, {"topic": "Sintaxe do Período", "difficulty": "difícil", "statement": "Orações adjetivas só podem ser introduzidas por pronome relativo “que”.", "correct": false, "explanation": "Há outros relativos."}, {"topic": "Sintaxe do Período", "difficulty": "fácil", "statement": "Vocativo costuma aparecer isolado por vírgula.", "correct": true, "explanation": "É marca comum da construção."}, {"topic": "Sintaxe do Período", "difficulty": "médio", "statement": "A identificação do termo da oração pode depender da regência do verbo.", "correct": true, "explanation": "Regência e sintaxe se articulam."}, {"topic": "Pronomes e Partículas", "difficulty": "fácil", "statement": "Próclise, mesóclise e ênclise são posições possíveis dos pronomes átonos.", "correct": true, "explanation": "São os três tipos clássicos."}, {"topic": "Pronomes e Partículas", "difficulty": "fácil", "statement": "Palavras negativas costumam atrair o pronome para antes do verbo.", "correct": true, "explanation": "É caso típico de próclise."}, {"topic": "Pronomes e Partículas", "difficulty": "médio", "statement": "No futuro do presente, a mesóclise pode ser cobrada como forma característica.", "correct": true, "explanation": "A banca usa isso como pegadinha."}, {"topic": "Pronomes e Partículas", "difficulty": "médio", "statement": "Pronomes relativos podem atrair a próclise.", "correct": true, "explanation": "São palavras atrativas."}, {"topic": "Pronomes e Partículas", "difficulty": "difícil", "statement": "No futuro do pretérito, a ênclise é a única colocação aceita.", "correct": false, "explanation": "A mesóclise é a forma clássica nesse contexto formal."}, {"topic": "Pronomes e Partículas", "difficulty": "fácil", "statement": "A troca indevida da posição do pronome pode tornar o item errado.", "correct": true, "explanation": "Colocação pronominal é tema específico do edital."}, {"topic": "Pronomes e Partículas", "difficulty": "médio", "statement": "A palavra “se” pode exercer diferentes funções em contextos distintos.", "correct": true, "explanation": "Índice de indeterminação, partícula apassivadora, conjunção etc."}, {"topic": "Pronomes e Partículas", "difficulty": "médio", "statement": "O “que” pode aparecer como pronome relativo, conjunção ou partícula expletiva, entre outros valores.", "correct": true, "explanation": "É palavra muito polissêmica."}, {"topic": "Pronomes e Partículas", "difficulty": "difícil", "statement": "A partícula “como” nunca introduz comparação.", "correct": false, "explanation": "Pode introduzir relação comparativa."}, {"topic": "Pronomes e Partículas", "difficulty": "fácil", "statement": "A banca costuma cobrar “se”, “que” e “como” como conteúdo complementar de desempate.", "correct": true, "explanation": "O PDF destaca esse bloco no ranking."}, {"topic": "Pronomes e Partículas", "difficulty": "médio", "statement": "A próclise é obrigatória depois de toda e qualquer palavra.", "correct": false, "explanation": "Ela depende de fatores atrativos específicos."}, {"topic": "Pronomes e Partículas", "difficulty": "fácil", "statement": "A colocação pronominal pode ser analisada em conjunto com a regência e com o tempo verbal.", "correct": true, "explanation": "Os temas se cruzam em vários itens."}, {"topic": "Pronomes e Partículas", "difficulty": "médio", "statement": "Em textos formais, a posição do pronome pode mudar sem qualquer impacto na correção.", "correct": false, "explanation": "Em muitos contextos, a posição é decisiva."}, {"topic": "Pronomes e Partículas", "difficulty": "difícil", "statement": "A palavra “se” em “alugam-se casas” funciona como partícula apassivadora.", "correct": true, "explanation": "Ela forma voz passiva sintética."}, {"topic": "Pronomes e Partículas", "difficulty": "fácil", "statement": "Reconhecer a função de “que” ajuda a julgar itens de sintaxe e coesão.", "correct": true, "explanation": "A palavra participa de várias estruturas."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "fácil", "statement": "Na reescrita, é preciso preservar correção e sentido ao mesmo tempo.", "correct": true, "explanation": "Não basta a frase ficar gramatical."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "médio", "statement": "Trocar um conectivo pode alterar a relação lógica entre as partes do texto.", "correct": true, "explanation": "Pode haver mudança de causa, oposição, conclusão etc."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "médio", "statement": "Substituir um termo por sinônimo dispensa atenção à regência.", "correct": false, "explanation": "A nova palavra pode exigir outra preposição."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "difícil", "statement": "Se a frase reescrita estiver correta gramaticalmente, o sentido original deixa de importar.", "correct": false, "explanation": "A banca também cobra preservação do sentido."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "fácil", "statement": "Elementos de referenciação ajudam a identificar a que termo um pronome se liga.", "correct": true, "explanation": "Isso faz parte da coesão textual."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "médio", "statement": "Repetição, substituição e referenciação são mecanismos de coesão.", "correct": true, "explanation": "Todos aparecem no edital."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "médio", "statement": "Coesão e coerência são conceitos iguais.", "correct": false, "explanation": "Relacionam-se, mas não se confundem."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "difícil", "statement": "Tempos e modos verbais não interferem na progressão textual.", "correct": false, "explanation": "Eles organizam a linha temporal e modal do discurso."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "fácil", "statement": "A reorganização de termos pode alterar foco, ênfase e até o sentido do período.", "correct": true, "explanation": "A ordem também produz efeito semântico."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "médio", "statement": "Reescrever por comparação entre original e nova versão ajuda a detectar deslizes.", "correct": true, "explanation": "É uma técnica prática útil."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "fácil", "statement": "Conectores ajudam na sequenciação textual.", "correct": true, "explanation": "Eles ligam ideias e orientam a leitura."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "médio", "statement": "Troca de pronome demonstrativo pode afetar a coesão do texto.", "correct": true, "explanation": "A referência pode mudar."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "difícil", "statement": "Um texto coerente pode ignorar totalmente a lógica interna, desde que esteja ortograficamente correto.", "correct": false, "explanation": "Coerência depende de sentido global."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "fácil", "statement": "O emprego inadequado de tempo verbal pode comprometer a coerência.", "correct": true, "explanation": "A temporalidade organiza o enunciado."}, {"topic": "Reescrita, Coesão e Verbos", "difficulty": "médio", "statement": "Reescrita de gêneros diferentes pode exigir ajuste de formalidade.", "correct": true, "explanation": "O nível de linguagem precisa ser compatível com o gênero."}];
+const PHRASES = ["Você está mais próximo de pertencer!", "Os fracos que se arrebentem!", "Missão dada é missão cumprida.", "Foco, disciplina e constância.", "Quem treina cansado luta descansado.", "Cada questão vencida aproxima a farda.", "Persistência também é tática.", "Seu esforço de hoje protege seu resultado de amanhã.", "Sem pressa, sem pausa, sem desculpa.", "Primeiro a disciplina, depois o resultado.", "Estudar também é operação.", "Você não precisa de sorte; precisa de sequência.", "É no fogo mais forte que se forja o aço bom.", "Treino duro, prova leve.", "Errou? Corrige, aprende e avança.", "Quem domina o detalhe domina a banca."];
+const PATENTS = [{"min": 0, "name": "Recruta"}, {"min": 1200, "name": "Soldado"}, {"min": 2600, "name": "Cabo"}, {"min": 4300, "name": "3º Sargento"}, {"min": 6200, "name": "2º Sargento"}, {"min": 8400, "name": "1º Sargento"}];
+const TOPICS = ["Interpretação", "Pontuação", "Regência e Crase", "Ortografia", "Concordância", "Classes de Palavras", "Tipologia e Gêneros", "Sintaxe do Período", "Pronomes e Partículas", "Reescrita, Coesão e Verbos"];
+const STORAGE = "pmal_portugues_255q_v1";
+let shield = false, timer = null, totalTime = 0, timeLeft = 0;
+
+function buildTopicMeta() {
+  let acc = 0;
+  return TOPICS.map(topic => {
+    const arr = QUESTIONS.filter(q => q.topic === topic);
+    const start = acc;
+    acc += arr.length;
+    return { topic, count: arr.length, start, end: acc - 1 };
+  });
+}
+const TOPIC_META = buildTopicMeta();
+
+function orderedQuestions() {
+  return QUESTIONS.map((q, i) => ({...q, id:i}));
+}
+function freshState() {
+  return {
+    ordered: orderedQuestions(),
+    idx: 0,
+    score: 0,
+    correct: 0,
+    wrong: 0,
+    streak: 0,
+    best: 0,
+    lives: 5,
+    answered: [],
+    sessions: [],
+    history: [],
+    trophies: {},
+    helps: {hint:false,time:false,skip:false,shield:false},
+    done:false
+  };
+}
+let state = load() || freshState();
+
+function save() { localStorage.setItem(STORAGE, JSON.stringify(state)); }
+function load() { try { return JSON.parse(localStorage.getItem(STORAGE)); } catch(e) { return null; } }
+function resetAll() {
+  if(confirm("Apagar progresso, histórico e troféus?")) {
+    localStorage.removeItem(STORAGE);
+    state = freshState();
+    shield = false;
+    refreshAll();
+    showScreen('home');
+  }
+}
+function currentQ() { return state.ordered[state.idx]; }
+function patentName() {
+  let name = PATENTS[0].name;
+  for (const p of PATENTS) if (state.score >= p.min) name = p.name;
+  return name;
+}
+function diffTime(d) { return d === "fácil" ? 24 : d === "médio" ? 20 : 16; }
+function diffPoints(d) { return d === "fácil" ? 70 : d === "médio" ? 105 : 145; }
+function topicMetaByIndex(idx) {
+  return TOPIC_META.find(t => idx >= t.start && idx <= t.end);
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  refreshAll();
+}
+function startNew() {
+  state = freshState();
+  shield = false;
+  save();
+  showScreen('game');
+  renderQuestion();
+}
+function continueGame() {
+  showScreen('game');
+  renderQuestion();
+}
+function updateBackground() {
+  const arr = ['bg1.jpeg','bg2.jpg','bg3.png','bg4.jpeg','bg5.jpeg','bg6.jpg'];
+  const src = arr[state.idx % arr.length];
+  document.body.style.setProperty('--bgsrc', src);
+  const st = document.getElementById('bgdyn') || document.createElement('style');
+  st.id = 'bgdyn';
+  st.innerHTML = `body::before{background:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.82)),url('${src}') center/cover no-repeat;}`;
+  document.head.appendChild(st);
+}
+function renderQuestion() {
+  if (state.idx >= state.ordered.length) return finish(true);
+  updateBackground();
+  const q = currentQ();
+  state.done = false;
+  document.getElementById('statement').textContent = q.statement;
+  document.getElementById('badgeTopic').textContent = q.topic;
+  document.getElementById('badgeDiff').textContent = "Nível " + q.difficulty;
+  document.getElementById('badgeScore').textContent = state.score + " pts";
+  document.getElementById('badgeLives').textContent = "❤️ " + state.lives + (shield ? " +🛡" : "");
+  document.getElementById('badgeProgress').textContent = (state.idx + 1) + " / " + state.ordered.length;
+  document.getElementById('badgePatent').textContent = patentName();
+  document.getElementById('motivation').textContent = PHRASES[state.idx % PHRASES.length];
+  document.getElementById('statusText').innerHTML = "Acertos: " + state.correct + "<br>Erros: " + state.wrong + "<br>Sequência: " + state.streak + "<br>Patente: " + patentName();
+  document.getElementById('overallBar').style.width = (state.answered.length * 100 / state.ordered.length).toFixed(1) + "%";
+  const fb = document.getElementById('feedback'); fb.className = "feedback";
+  document.getElementById('feedbackTitle').textContent = "";
+  document.getElementById('feedbackText').textContent = "";
+  document.getElementById('nextBtn').disabled = true;
+  ['btnTrue','btnFalse'].forEach(id => { const b = document.getElementById(id); b.disabled = false; b.classList.remove('correct','wrong'); });
+  ['hint','time','skip','shield'].forEach(k => document.getElementById('help' + k.charAt(0).toUpperCase() + k.slice(1)).disabled = state.helps[k]);
+  renderPhaseBar();
+  startTimer(diffTime(q.difficulty));
+  save();
+}
+function renderPhaseBar() {
+  const now = topicMetaByIndex(state.idx);
+  document.getElementById('phaseBar').innerHTML = TOPIC_META.map((t, i) => {
+    const cls = state.trophies[t.topic] ? "phasechip done" : "phasechip";
+    const marker = t.topic === now.topic ? "▶ " : "";
+    return `<div class="${cls}">${marker}${i+1}. ${t.topic}</div>`;
+  }).join('');
+}
+function startTimer(sec) {
+  clearInterval(timer);
+  totalTime = sec; timeLeft = sec; paintTimer();
+  timer = setInterval(() => {
+    timeLeft -= 1; paintTimer();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      if (!state.done) answer(null, true);
+    }
+  }, 1000);
+}
+function paintTimer() {
+  const pct = Math.max(0, timeLeft / totalTime * 100);
+  const el = document.getElementById('timerFill');
+  el.style.width = pct + "%";
+  el.style.background = pct > 45 ? "linear-gradient(90deg,var(--green),#9bf2c2)" : pct > 20 ? "linear-gradient(90deg,var(--gold),#ffe089)" : "linear-gradient(90deg,var(--red),#ff9cab)";
+}
+function playGood() {
+  try {
+    const c = new (window.AudioContext||window.webkitAudioContext)();
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = "triangle"; o.frequency.value = 680; g.gain.value = .04;
+    o.connect(g); g.connect(c.destination); o.start();
+    o.frequency.setValueAtTime(900,c.currentTime+.08); o.stop(c.currentTime+.18);
+  } catch(e) {}
+}
+function playBad() {
+  try {
+    const c = new (window.AudioContext||window.webkitAudioContext)();
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = "square"; o.frequency.value = 220; g.gain.value = .04;
+    o.connect(g); g.connect(c.destination); o.start();
+    o.frequency.setValueAtTime(160,c.currentTime+.1); o.stop(c.currentTime+.26);
+  } catch(e) {}
+  try {
+    const u = new SpeechSynthesisUtterance("Não contava com a minha astúcia!");
+    u.lang = "pt-BR"; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  } catch(e) {}
+}
+function answer(choice, timeout=false) {
+  if (state.done) return;
+  state.done = true;
+  clearInterval(timer);
+  const q = currentQ();
+  const ok = choice === q.correct;
+  document.getElementById(q.correct ? 'btnTrue' : 'btnFalse').classList.add('correct');
+  if (choice !== null && choice !== q.correct) document.getElementById(choice ? 'btnTrue' : 'btnFalse').classList.add('wrong');
+  ['btnTrue','btnFalse'].forEach(id => document.getElementById(id).disabled = true);
+
+  const fb = document.getElementById('feedback');
+  const title = document.getElementById('feedbackTitle');
+  const text = document.getElementById('feedbackText');
+
+  if (ok) {
+    const pts = diffPoints(q.difficulty) + Math.min(60, state.streak*5);
+    state.score += pts; state.correct += 1; state.streak += 1; state.best = Math.max(state.best, state.streak);
+    fb.className = "feedback show good";
+    title.textContent = "✅ Acertou!";
+    text.textContent = "Resposta correta: " + (q.correct ? "CERTO" : "ERRADO") + ". " + q.explanation + " (+" + pts + " pts)";
+    playGood();
+  } else {
+    state.wrong += 1; state.streak = 0;
+    const blocked = shield;
+    if (!blocked) state.lives -= 1;
+    shield = false;
+    fb.className = "feedback show bad";
+    title.textContent = timeout ? "⏳ Tempo esgotado." : "❌ Errou.";
+    text.textContent = "Resposta correta: " + (q.correct ? "CERTO" : "ERRADO") + ". " + q.explanation + (blocked ? " O escudo absorveu a punição." : "");
+    playBad();
+  }
+
+  if (!state.answered.includes(q.id)) state.answered.push(q.id);
+  state.history.unshift({id:q.id, topic:q.topic, result: ok ? "Acerto" : (timeout ? "Tempo" : "Erro"), statement:q.statement, explanation:q.explanation, correct:q.correct, difficulty:q.difficulty});
+  state.history = state.history.slice(0, 200);
+  checkTrophy(q.topic);
+  document.getElementById('nextBtn').disabled = false;
+  save();
+  refreshAll();
+}
+function checkTrophy(topic) {
+  const t = TOPIC_META.find(x => x.topic === topic);
+  const all = [];
+  for (let i=t.start;i<=t.end;i++) all.push(i);
+  const done = all.every(id => state.answered.includes(id));
+  if (done && !state.trophies[topic]) {
+    state.trophies[topic] = true;
+    openModal("<h2>🏆 Troféu conquistado</h2><p>Fase concluída: <b>" + topic + "</b></p><p style='color:var(--gold);font-weight:900'>" + PHRASES[Math.floor(Math.random()*PHRASES.length)] + "</p>");
+  }
+}
+function nextQuestion() {
+  state.idx += 1;
+  if (state.lives <= 0) {
+    restartFromCurrentPhase();
+    return;
+  }
+  save();
+  renderQuestion();
+}
+function restartFromCurrentPhase() {
+  const meta = topicMetaByIndex(Math.min(state.idx, state.ordered.length-1));
+  state.idx = meta.start;
+  state.lives = 5;
+  shield = false;
+  save();
+  openModal("<h2>💥 Vidas esgotadas</h2><p>Você vai reiniciar no começo da fase <b>" + meta.topic + "</b>.</p><p class='muted'>Seu histórico, pontuação e troféus foram mantidos.</p>");
+  renderQuestion();
+}
+function finish(win) {
+  clearInterval(timer);
+  state.sessions.push({when:new Date().toISOString(), score:state.score, correct:state.correct, wrong:state.wrong, win:win});
+  save();
+  openModal((win ? "<h2>🏁 Missão concluída</h2><p>Você terminou todas as " + state.ordered.length + " questões.</p>" : "<h2>Fim da sessão</h2>") + "<div class='badges'><div class='badge g'>" + state.score + " pts</div><div class='badge'>" + patentName() + "</div><div class='badge'>Acertos: " + state.correct + "</div><div class='badge'>Erros: " + state.wrong + "</div></div>");
+  showScreen('home');
+}
+function useHelp(type) {
+  if (state.helps[type] || state.done) return;
+  const q = currentQ();
+  state.helps[type] = true;
+  if (type === 'hint') {
+    let msg = "Observe o núcleo lógico da frase e desconfie de generalizações.";
+    if (/de acordo com o texto|segundo o texto|conforme o texto/i.test(q.statement)) msg = "Comando de compreensão: procure informação explícita.";
+    else if (/infere-se|depreende-se|conclui-se/i.test(q.statement)) msg = "Comando inferencial: procure o implícito sem sair do texto.";
+    else if (/crase|regência|visar|obedecer|assistir|prefiro/i.test(q.statement)) msg = "Confira a preposição exigida e se há artigo feminino.";
+    else if (/vírgula|travess|dois-pontos|reticências|aspas/i.test(q.statement)) msg = "Pense na função sintática e no efeito de sentido da pontuação.";
+    openModal("<h2>🧠 Dica do Instrutor</h2><p>" + msg + "</p>");
+  }
+  if (type === 'time') {
+    timeLeft += 15; totalTime += 15; paintTimer();
+    openModal("<h2>⏱ Tempo Extra</h2><p>+15 segundos adicionados.</p>");
+  }
+  if (type === 'skip') {
+    state.history.unshift({id:q.id, topic:q.topic, result:"Pulada", statement:q.statement, explanation:q.explanation, correct:q.correct, difficulty:q.difficulty});
+    state.idx += 1;
+    save();
+    renderQuestion();
+    return;
+  }
+  if (type === 'shield') {
+    shield = true;
+    openModal("<h2>🛡 Escudo ativado</h2><p>Seu próximo erro não vai retirar vida.</p>");
+  }
+  save();
+  renderQuestion();
+}
+function openModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+function reviewQuestion(id) {
+  const q = state.ordered[id];
+  const answered = state.answered.includes(id);
+  if (!answered) return;
+  const hist = state.history.find(h => h.id === id) || {result:"Respondida"};
+  openModal("<h2>Revisão da questão</h2><p><b>Assunto:</b> " + q.topic + " • <b>Nível:</b> " + q.difficulty + "</p><div class='statement' style='margin-top:8px'>" + q.statement + "</div><p><b>Gabarito:</b> " + (q.correct ? "CERTO" : "ERRADO") + "</p><p><b>Explicação:</b> " + q.explanation + "</p><p class='muted'><b>Último status no histórico:</b> " + hist.result + "</p>");
+}
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const answeredSet = new Set(state.answered);
+  list.innerHTML = state.ordered.map(q => {
+    const ok = answeredSet.has(q.id);
+    const result = state.history.find(h => h.id === q.id);
+    return `<div class="item ${ok ? 'clickable' : 'locked'}" ${ok ? `onclick="reviewQuestion(${q.id})"` : ''}>
+      <b>${ok ? (result?.result || 'Respondida') : '🔒 Bloqueada'}</b> • ${q.topic} • ${q.difficulty}<br>
+      <small>Questão ${q.id+1} — ${ok ? 'toque para revisar' : 'responda no jogo para desbloquear'}</small>
+    </div>`;
+  }).join('');
+  document.getElementById('histCorrect').textContent = state.correct;
+  document.getElementById('histWrong').textContent = state.wrong;
+  const total = state.correct + state.wrong;
+  document.getElementById('histAcc').textContent = (total ? Math.round(state.correct*100/total) : 0) + "%";
+  document.getElementById('histSessions').textContent = state.sessions.length;
+}
+function renderPhases() {
+  document.getElementById('phaseList').innerHTML = TOPIC_META.map((t, i) => {
+    const done = state.answered.filter(id => id >= t.start && id <= t.end).length;
+    const trophy = state.trophies[t.topic] ? "🏆" : "⬜";
+    return `<div class="item"><b>${trophy} Fase ${i+1} — ${t.topic}</b><br><small>${done} / ${t.count} concluídas</small></div>`;
+  }).join('');
+  document.getElementById('patentList').innerHTML = PATENTS.map(p => `<div class="item"><b>${p.name}</b><br><small>${p.min} pontos ou mais</small></div>`).join('');
+}
+function refreshHome() {
+  document.getElementById('homeScore').textContent = state.score;
+  document.getElementById('homeAnswered').textContent = state.answered.length + " / " + state.ordered.length;
+  document.getElementById('homePatent').textContent = patentName();
+  document.getElementById('homeTrophies').textContent = Object.keys(state.trophies).length;
+}
+function refreshAll() {
+  refreshHome();
+  renderHistory();
+  renderPhases();
+}
+refreshAll();
+</script>
+</body>
+</html>
